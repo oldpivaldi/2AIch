@@ -20,7 +20,7 @@ const MainHeader = () => {
 	})
 
 	const handleNewChat = () => {
-		setChatId('')
+		setChatId(null)
 
 		queryClient.invalidateQueries({ queryKey: ['createChat'] })
 	}

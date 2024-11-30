@@ -9,7 +9,6 @@ import { useEffect } from 'react'
 
 const MainPage = () => {
 	const { chatId, setChatId } = useChatIdStore()
-	console.log(!!chatId)
 
 	const { data, isSuccess, isError, error } = useQuery({
 		queryKey: ['createChat'],
@@ -19,14 +18,13 @@ const MainPage = () => {
 
 	useEffect(() => {
 		if (isSuccess) {
-			setChatId(data.data.chat_id)
+			setChatId(data.chat_id)
 		}
 
 		if (isError) {
 			toast.error(error.message)
-			setChatId('data.data.chat_id')
 		}
-	}, [data?.data.chat_id, error?.message, isError, isSuccess, setChatId])
+	}, [data?.chat_id, error?.message, isError, isSuccess, setChatId])
 
 	return (
 		<div className='h-screen flex flex-col'>

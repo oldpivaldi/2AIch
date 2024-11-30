@@ -10,7 +10,7 @@ import {
 } from './ui/tooltip'
 
 interface MessageProps {
-	author: 'user' | 'bot'
+	author: 'user' | 'llm'
 	description: string
 }
 

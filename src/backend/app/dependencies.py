@@ -3,6 +3,7 @@ from pytz import utc
 from fastapi import Depends
 from redis.asyncio import Redis
 
+from app.clients.text_model_client import TextModelClient
 from app.configs.redis_config import RedisConnection
 from app.repositories.chat_repository import ChatHistoryRepository
 from app.repositories.websocket_repository import WebSocketRepository
@@ -13,6 +14,8 @@ from apscheduler.executors.pool import ProcessPoolExecutor
 
 redis_connection = RedisConnection()
 
+def get_text_model_client() -> TextModelClient:
+    return TextModelClient("http://localhost:8001")
 
 def get_redis() -> Redis:
     return redis_connection.get_redis()
@@ -25,8 +28,7 @@ def get_chat_history_repository(
 def get_websocket_repository() -> WebSocketRepository:
     return WebSocketRepository()
 
-def get_scheduler(redis: Redis = Depends(get_redis)) -> AsyncIOScheduler:
-    """Создает экземпляр планировщика с RedisJobStore."""
+def get_scheduler() -> AsyncIOScheduler:
     jobstores = {
         'default': RedisJobStore(
             jobs_key='apscheduler.jobs',
@@ -57,6 +59,7 @@ def get_scheduler(redis: Redis = Depends(get_redis)) -> AsyncIOScheduler:
 def get_chat_service(
         chat_history_repository: ChatHistoryRepository = Depends(get_chat_history_repository),
         websocket_repository: WebSocketRepository = Depends(get_websocket_repository),
-        scheduler: AsyncIOScheduler = Depends(get_scheduler)
+        scheduler: AsyncIOScheduler = Depends(get_scheduler),
+        text_model_client: TextModelClient = Depends(get_text_model_client),
 ) -> ChatService:
-    return ChatService(chat_history_repository, websocket_repository, scheduler)
+    return ChatService(chat_history_repository, websocket_repository, scheduler, text_model_client)

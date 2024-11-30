@@ -3,7 +3,7 @@ export interface CreateRes {
 }
 
 interface Message {
-	sender: string
+	sender: 'user' | 'llm'
 	message: string
 	timestamp: string
 }

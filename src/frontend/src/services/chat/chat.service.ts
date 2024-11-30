@@ -11,7 +11,7 @@ class ChatService {
 	async create() {
 		const response = await apiClient.post<CreateRes>(this.BASE_URL)
 
-		return response
+		return response.data
 	}
 
 	async getHistory(chatId: string) {
@@ -19,7 +19,7 @@ class ChatService {
 			`${this.BASE_URL}/${chatId}/history`
 		)
 
-		return response
+		return response.data
 	}
 
 	async sendMessage(chatId: string, message: SendMessageReq) {

@@ -6,6 +6,7 @@ from typing import List
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from app.clients.text_model_client import TextModelClient
 from app.repositories.chat_repository import ChatHistoryRepository
 from app.models import Message, ChatEvent
 from app.repositories.websocket_repository import WebSocketRepository
@@ -16,26 +17,29 @@ class ChatService:
             self,
             chat_history_repository: ChatHistoryRepository,
             websocket_repository: WebSocketRepository,
-            scheduler: AsyncIOScheduler
+            scheduler: AsyncIOScheduler,
+            text_model_client: TextModelClient
     ):
         self.chat_history_repository = chat_history_repository
         self.websocket_repository = websocket_repository
         self.scheduler = scheduler
+        self.text_model_client = text_model_client
 
-    def create_chat(self) -> str:
+    async def create_chat(self) -> str:
         chat_id = str(uuid.uuid4())
-        self.chat_history_repository.create_chat(chat_id)
+        await self.chat_history_repository.create_chat(chat_id)
         logging.info(f"Создан чат {chat_id}")
         return chat_id
 
-    def check_chat_exists(self, chat_id: str) -> bool:
-        return self.chat_history_repository.check_chat_exists(chat_id)
+    async def check_chat_exists(self, chat_id: str) -> bool:
+        return await self.chat_history_repository.check_chat_exists(chat_id)
 
-    def get_chat_history(self, chat_id: str) -> List[Message]:
-        return self.chat_history_repository.get_history(chat_id)
+    async def get_chat_history(self, chat_id: str) -> List[Message]:
+        return await self.chat_history_repository.get_history(chat_id)
 
     async def add_task_for_generate(self, chat_id: str, message: str):
-        self.chat_history_repository.add_message(chat_id, "user", message)
+        await self.chat_history_repository.add_message(chat_id, "user", message)
+
         await self.websocket_repository.send_message(chat_id, ChatEvent(status="generating", message=None, timestamp=datetime.utcnow()))
 
         self.scheduler.add_job(
@@ -47,10 +51,18 @@ class ChatService:
         )
 
     async def process_generate(self, chat_id: str):
-        history = self.chat_history_repository.get_history(chat_id)
-        answer = f"Ответ на сообщение '{history.__str__()}' от LLM"
-        await asyncio.sleep(2)
+        history = await self.chat_history_repository.get_history(chat_id)
 
-        self.chat_history_repository.add_message(chat_id, "llm", answer)
+        last_message = max(history, key=lambda msg: msg.timestamp)
+
+        history_messages = [msg for msg in history if msg != last_message]
+
+        sorted(history_messages, key=lambda msg: msg.timestamp)
+
+        history_str = "\n".join(f"{msg.sender}: {msg.content}" for msg in history)
+
+        answer = await self.text_model_client.get_answer(last_message.message, history_str)
+
+        await self.chat_history_repository.add_message(chat_id, "llm", answer)
 
         await self.websocket_repository.send_message(chat_id, ChatEvent(status="generated", message=answer, timestamp=datetime.utcnow()))
