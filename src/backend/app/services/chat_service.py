@@ -55,8 +55,8 @@ class ChatService:
         last_message = max(history.history, key=lambda msg: msg.timestamp)
 
         history_messages = sorted(history.history, key=lambda msg: msg.timestamp)
-
-        history_str = "\n".join(f"{msg.sender}: {msg.content}" for msg in history_messages)
+        print(history_messages)
+        history_str = "\n".join(f"{msg.sender}: {msg.message}" for msg in history_messages)
 
         answer = await self.text_model_client.get_answer(last_message.message, history_str)
 
