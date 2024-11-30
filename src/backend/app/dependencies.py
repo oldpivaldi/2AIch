@@ -1,5 +1,5 @@
-from apscheduler.jobstores.redis import RedisJobStore
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.memory import MemoryJobStore
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import utc
 from fastapi import Depends
 from redis.asyncio import Redis
@@ -10,7 +10,6 @@ from app.repositories.chat_repository import ChatHistoryRepository
 from app.repositories.websocket_repository import WebSocketRepository
 from app.services.chat_service import ChatService
 from apscheduler.executors.pool import ProcessPoolExecutor
-
 
 redis_connection = RedisConnection()
 
@@ -28,39 +27,33 @@ def get_chat_history_repository(
 def get_websocket_repository() -> WebSocketRepository:
     return WebSocketRepository()
 
-def get_scheduler() -> BackgroundScheduler:
+def get_scheduler() -> AsyncIOScheduler:
     jobstores = {
-        'default': RedisJobStore(
-            jobs_key='apscheduler.jobs',
-            run_times_key='apscheduler.run_times',
-            host=redis_connection.host,
-            port=redis_connection.port,
-            db=0,
-            password=redis_connection.password,
-        ),
+        'default': MemoryJobStore(),  # Хранилище задач в памяти
     }
     executors = {
         'default': {'type': 'threadpool', 'max_workers': 20},
-        'processpool': ProcessPoolExecutor(max_workers=5)
+        'processpool': ProcessPoolExecutor(max_workers=5),
     }
     job_defaults = {
-        'coalesce': False,
-        'max_instances': 1
+        'coalesce': False,  # Не объединять пропущенные вызовы
+        'max_instances': 1,  # Максимум одна параллельная задача
     }
 
-    scheduler = BackgroundScheduler()
-    scheduler.configure(
+    new_scheduler = AsyncIOScheduler()
+    new_scheduler.configure(
         jobstores=jobstores,
         executors=executors,
         job_defaults=job_defaults,
-        timezone=utc
+        timezone=utc,  # Используем UTC
     )
-    return scheduler
+    return new_scheduler
+
+task_scheduler = get_scheduler()
 
 def get_chat_service(
         chat_history_repository: ChatHistoryRepository = Depends(get_chat_history_repository),
         websocket_repository: WebSocketRepository = Depends(get_websocket_repository),
-        scheduler: BackgroundScheduler = Depends(get_scheduler),
         text_model_client: TextModelClient = Depends(get_text_model_client),
 ) -> ChatService:
-    return ChatService(chat_history_repository, websocket_repository, scheduler, text_model_client)
+    return ChatService(chat_history_repository, websocket_repository, task_scheduler, text_model_client)

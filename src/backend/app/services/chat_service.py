@@ -3,7 +3,7 @@ import logging
 import uuid
 from datetime import datetime, timedelta
 
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.clients.text_model_client import TextModelClient
 from app.repositories.chat_repository import ChatHistoryRepository
@@ -16,7 +16,7 @@ class ChatService:
             self,
             chat_history_repository: ChatHistoryRepository,
             websocket_repository: WebSocketRepository,
-            scheduler: BackgroundScheduler,
+            scheduler: AsyncIOScheduler,
             text_model_client: TextModelClient
     ):
         self.chat_history_repository = chat_history_repository
@@ -45,14 +45,11 @@ class ChatService:
             id=f"chat_id:{chat_id}",
             func=self.process_generate,
             trigger='date',
-            run_date=datetime.utcnow() + timedelta(seconds=10),
+            run_date=datetime.utcnow() + timedelta(seconds=5),
             args=[chat_id]
         )
 
-    def process_generate(self, chat_id: str):
-        asyncio.run(self.generate_answer(chat_id))
-
-    async def generate_answer(self, chat_id: str):
+    async def process_generate(self, chat_id: str):
         history = await self.chat_history_repository.get_history(chat_id)
 
         last_message = max(history.history, key=lambda msg: msg.timestamp)
