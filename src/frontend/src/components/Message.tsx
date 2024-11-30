@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, lazy, Suspense, useState } from 'react'
 import { Bot, User, Copy, Check } from 'lucide-react'
 import {
 	Alert,
@@ -9,9 +9,10 @@ import {
 	Tooltip,
 	TooltipTrigger,
 	TooltipContent,
+	Skeleton,
 } from '@/components'
-import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+const Markdown = lazy(() => import('react-markdown'))
 
 interface MessageProps {
 	author: 'user' | 'llm'
@@ -42,7 +43,9 @@ export const Message: FC<MessageProps> = ({ author, description }) => {
 			)}
 			<AlertTitle className='capitalize'>{author}</AlertTitle>
 			<AlertDescription>
-				<Markdown remarkPlugins={[remarkGfm]}>{description}</Markdown>
+				<Suspense fallback={<Skeleton className='w-full h-5' />}>
+					<Markdown remarkPlugins={[remarkGfm]}>{description}</Markdown>
+				</Suspense>
 			</AlertDescription>
 			<div className='mt-1'>
 				<TooltipProvider>
