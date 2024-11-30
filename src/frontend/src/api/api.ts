@@ -8,7 +8,7 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
 	config => config,
 	async error => {
-		toast.error(error?.message ?? 'Что-то пошло не так')
+		toast.error(error?.message ?? 'Oops Something Went Wrong')
 
 		throw error
 	}

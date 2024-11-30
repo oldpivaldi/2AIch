@@ -10,6 +10,8 @@ import {
 	TooltipTrigger,
 	TooltipContent,
 } from '@/components'
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface MessageProps {
 	author: 'user' | 'llm'
@@ -39,7 +41,9 @@ export const Message: FC<MessageProps> = ({ author, description }) => {
 				<Bot className='h-4 w-4' />
 			)}
 			<AlertTitle className='capitalize'>{author}</AlertTitle>
-			<AlertDescription>{description}</AlertDescription>
+			<AlertDescription>
+				<Markdown remarkPlugins={[remarkGfm]}>{description}</Markdown>
+			</AlertDescription>
 			<div className='mt-1'>
 				<TooltipProvider>
 					<Tooltip delayDuration={0} open={copied}>
