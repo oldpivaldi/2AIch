@@ -1,0 +1,14 @@
+langchain==0.3.9
+langchain-ollama==0.2.0
+ollama==0.4.2
+
+fastapi==0.115.5
+pydantic-settings==2.6.1
+sentry-sdk==2.19.0
+uvicorn==0.32.1
+betterlogging==1.0.0
+
+pydantic~=2.10.2
+pydantic_core~=2.27.1
+typing_extensions~=4.12.2
+starlette~=0.41.3

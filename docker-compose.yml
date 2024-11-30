@@ -1,0 +1,44 @@
+version: '3.7'
+
+services:
+  text_model_api:
+    build: ./src/text_model_api
+    # environment:
+    ports:
+      - "8001:8001"
+    networks:
+      - network
+    depends_on:
+      - redis
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
+    restart: always
+
+  redis:
+    image: redis:latest
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PORT=${REDIS_PORT}
+    networks:
+      - network
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always
+
+volumes:
+  redis-data:
+
+networks:
+  network:
+    driver: bridge
