@@ -2,7 +2,7 @@ export interface CreateRes {
 	chat_id: string
 }
 
-interface Message {
+export interface Message {
 	sender: 'user' | 'llm'
 	message: string
 	timestamp: string
