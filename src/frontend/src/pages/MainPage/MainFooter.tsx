@@ -1,31 +1,49 @@
 import { useState } from 'react'
 import { Send } from 'lucide-react'
-import {
-	useIsFetching,
-	useMutation,
-	useQueryClient,
-} from '@tanstack/react-query'
+import { useIsFetching, useMutation } from '@tanstack/react-query'
 import { chatService } from '@/services/chat/chat.service'
 import { useChatIdStore } from '@/utils/useChatIdStore'
 import { Button, Textarea, Loader } from '@/components'
 import { useHistoryStore } from '@/utils/useHistoryStore'
+import { SocketMessage, StatusMessage } from '@/services/chat/chat.interfaces'
+import { toast } from 'sonner'
+import { useSocketStatusStore } from '@/utils/useSocketStatusStore'
 
 const MainFooter = () => {
 	const [text, setText] = useState('')
+
 	const addMessage = useHistoryStore(state => state.addMessage)
-
+	const { isGenerating, setIsGenerating } = useSocketStatusStore()
 	const chatId = useChatIdStore(state => state.chatId)
-
-	const queryClient = useQueryClient()
 
 	const { mutate: sendMessage, isPending } = useMutation({
 		mutationKey: ['sendMessage'],
 		mutationFn: (message: string) =>
 			chatService.sendMessage(chatId, { message }),
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['getHistory'],
-			})
+			const socket = new WebSocket(`wss://domen/chat/${chatId}/ws`)
+
+			setIsGenerating(true)
+
+			socket.onmessage = (event: MessageEvent<SocketMessage>) => {
+				if (event.data.message == StatusMessage.GENERATED) {
+					addMessage({
+						sender: 'llm',
+						message: event.data.message,
+						timestamp: event.data.timestamp,
+					})
+
+					socket.close(200)
+				}
+			}
+
+			socket.onerror = error => {
+				toast.error(`[Socket error]: ${error.type}`)
+
+				socket.close(500, 'Ты пидор')
+			}
+
+			setIsGenerating(false)
 		},
 	})
 
@@ -48,7 +66,7 @@ const MainFooter = () => {
 	})
 
 	const isDisableButton =
-		!chatId || !text || isPending || !!isFetchingGetHistory
+		!chatId || !text || isPending || isGenerating || !!isFetchingGetHistory
 
 	return (
 		<footer className='h-16 min-h-16 flex justify-center'>
@@ -65,7 +83,7 @@ const MainFooter = () => {
 					disabled={isDisableButton}
 					onClick={sendText}
 				>
-					{isPending ? <Loader /> : <Send />}
+					{isPending || isGenerating ? <Loader /> : <Send />}
 				</Button>
 			</div>
 		</footer>

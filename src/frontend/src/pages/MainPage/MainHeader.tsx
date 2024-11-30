@@ -14,11 +14,13 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components'
+import { useSocketStatusStore } from '@/utils/useSocketStatusStore'
 
 const MainHeader = () => {
 	const queryClient = useQueryClient()
 
 	const setChatId = useChatIdStore(state => state.setChatId)
+	const isGenerating = useSocketStatusStore(store => store.isGenerating)
 
 	const isFetchingCreateChat = useIsFetching({
 		queryKey: ['createChat'],
@@ -31,7 +33,10 @@ const MainHeader = () => {
 	const isMutatingSendMessage = useIsMutating({ mutationKey: ['sendMessage'] })
 
 	const isDisabled =
-		!!isFetchingCreateChat || !!isFetchingGetHistory || !!isMutatingSendMessage
+		!!isFetchingCreateChat ||
+		!!isFetchingGetHistory ||
+		!!isMutatingSendMessage ||
+		isGenerating
 
 	const handleNewChat = () => {
 		setChatId('')

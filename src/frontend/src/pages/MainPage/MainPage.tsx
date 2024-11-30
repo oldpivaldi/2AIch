@@ -9,17 +9,17 @@ import MainFooter from './MainFooter'
 const MainPage = () => {
 	const { chatId, setChatId } = useChatIdStore()
 
-	const { data, isSuccess } = useQuery({
+	const { data: chatInfo, isSuccess: isSuccessCreateChat } = useQuery({
 		queryKey: ['createChat'],
 		queryFn: () => chatService.create(),
 		enabled: !chatId,
 	})
 
 	useEffect(() => {
-		if (isSuccess) {
-			setChatId(data.chat_id)
+		if (isSuccessCreateChat) {
+			setChatId(chatInfo.chat_id)
 		}
-	}, [data?.chat_id, isSuccess, setChatId])
+	}, [chatInfo?.chat_id, isSuccessCreateChat, setChatId])
 
 	return (
 		<div className='h-screen flex flex-col'>

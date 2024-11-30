@@ -5,25 +5,33 @@ import { Message, Skeleton } from '@/components'
 import { useEffect } from 'react'
 import { useHistoryStore } from '@/utils/useHistoryStore'
 import { sortHistory } from '@/utils/sortHistory'
+import { useSocketStatusStore } from '@/utils/useSocketStatusStore'
 
 const MainContent = () => {
 	const { history, setHistory } = useHistoryStore()
-
 	const chatId = useChatIdStore(state => state.chatId)
+	const isGenerating = useSocketStatusStore(state => state.isGenerating)
 
-	const { data, isSuccess, isLoading, isError } = useQuery({
+	const {
+		data,
+		isSuccess: isSuccessGetHistory,
+		isPending: isPendingGetHistory,
+		isError: isErrorGetHistory,
+	} = useQuery({
 		queryKey: ['getHistory'],
 		queryFn: () => chatService.getHistory(chatId),
 		enabled: !!chatId,
 	})
 
 	useEffect(() => {
-		if (isSuccess && data) {
+		if (isSuccessGetHistory && data) {
 			const sortedHistory = sortHistory(data.history)
 
 			setHistory(sortedHistory)
 		}
-	}, [data, isSuccess, setHistory])
+	}, [data, isSuccessGetHistory, setHistory])
+
+	const isLoading = isGenerating || isPendingGetHistory
 
 	return (
 		<main className='max-h-chat flex-grow flex flex-col gap-5 items-center overflow-y-auto pt-4 pb-9'>
@@ -39,7 +47,9 @@ const MainContent = () => {
 					<Skeleton className='h-28' />
 				</div>
 			)}
-			{isError && <p className='text-3xl'>Oops Something Went Wrong</p>}
+			{isErrorGetHistory && (
+				<p className='text-3xl'>Oops Something Went Wrong</p>
+			)}
 		</main>
 	)
 }

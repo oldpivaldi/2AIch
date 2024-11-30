@@ -15,3 +15,14 @@ export interface GetHistoryRes {
 export interface SendMessageReq {
 	message: string
 }
+
+export enum StatusMessage {
+	GENERATING = 'generating',
+	GENERATED = 'generated',
+}
+
+export interface SocketMessage {
+	status: StatusMessage
+	message: string
+	timestamp: string
+}
