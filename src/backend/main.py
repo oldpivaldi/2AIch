@@ -13,6 +13,7 @@ app.mount("/", StaticFiles(directory="static", html=True), name="static")
 @app.on_event("startup")
 async def startup():
     scheduler = get_scheduler()
+    scheduler.remove_all_jobs()
     scheduler.start()
 
 @app.on_event("shutdown")

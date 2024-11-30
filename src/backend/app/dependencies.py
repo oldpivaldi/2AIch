@@ -1,4 +1,5 @@
 from apscheduler.jobstores.redis import RedisJobStore
+from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import utc
 from fastapi import Depends
 from redis.asyncio import Redis
@@ -8,7 +9,6 @@ from app.configs.redis_config import RedisConnection
 from app.repositories.chat_repository import ChatHistoryRepository
 from app.repositories.websocket_repository import WebSocketRepository
 from app.services.chat_service import ChatService
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.executors.pool import ProcessPoolExecutor
 
 
@@ -28,14 +28,14 @@ def get_chat_history_repository(
 def get_websocket_repository() -> WebSocketRepository:
     return WebSocketRepository()
 
-def get_scheduler() -> AsyncIOScheduler:
+def get_scheduler() -> BackgroundScheduler:
     jobstores = {
         'default': RedisJobStore(
             jobs_key='apscheduler.jobs',
             run_times_key='apscheduler.run_times',
             host=redis_connection.host,
             port=redis_connection.port,
-            db=redis_connection.db,
+            db=0,
             password=redis_connection.password,
         ),
     }
@@ -45,10 +45,10 @@ def get_scheduler() -> AsyncIOScheduler:
     }
     job_defaults = {
         'coalesce': False,
-        'max_instances': 3
+        'max_instances': 1
     }
 
-    scheduler = AsyncIOScheduler()
+    scheduler = BackgroundScheduler()
     scheduler.configure(
         jobstores=jobstores,
         executors=executors,
@@ -60,7 +60,7 @@ def get_scheduler() -> AsyncIOScheduler:
 def get_chat_service(
         chat_history_repository: ChatHistoryRepository = Depends(get_chat_history_repository),
         websocket_repository: WebSocketRepository = Depends(get_websocket_repository),
-        scheduler: AsyncIOScheduler = Depends(get_scheduler),
+        scheduler: BackgroundScheduler = Depends(get_scheduler),
         text_model_client: TextModelClient = Depends(get_text_model_client),
 ) -> ChatService:
     return ChatService(chat_history_repository, websocket_repository, scheduler, text_model_client)
