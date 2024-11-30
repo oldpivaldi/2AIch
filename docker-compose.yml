@@ -6,6 +6,8 @@ services:
     # environment:
     ports:
       - "8001:8001"
+    volumes:
+      - "./src/text_model_api/repo:/app/models"
     networks:
       - network
     depends_on:
