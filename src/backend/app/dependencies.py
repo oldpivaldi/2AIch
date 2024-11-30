@@ -1,21 +1,40 @@
+from apscheduler.jobstores.redis import RedisJobStore
 from pytz import utc
-from apscheduler.jobstores.memory import MemoryJobStore
 from fastapi import Depends
+from redis.asyncio import Redis
+
+from app.configs.redis_config import RedisConnection
 from app.repositories.chat_repository import ChatHistoryRepository
 from app.repositories.websocket_repository import WebSocketRepository
 from app.services.chat_service import ChatService
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.executors.pool import ProcessPoolExecutor
 
-def get_chat_history_repository() -> ChatHistoryRepository:
-    return ChatHistoryRepository()
+
+redis_connection = RedisConnection()
+
+
+def get_redis() -> Redis:
+    return redis_connection.get_redis()
+
+def get_chat_history_repository(
+        redis: Redis = Depends(get_redis),
+) -> ChatHistoryRepository:
+    return ChatHistoryRepository(redis)
 
 def get_websocket_repository() -> WebSocketRepository:
     return WebSocketRepository()
 
-def get_scheduler() -> AsyncIOScheduler:
+def get_scheduler(redis: Redis = Depends(get_redis)) -> AsyncIOScheduler:
+    """Создает экземпляр планировщика с RedisJobStore."""
     jobstores = {
-        'default': MemoryJobStore(),
+        'default': RedisJobStore(
+            jobs_key='apscheduler.jobs',
+            run_times_key='apscheduler.run_times',
+            host=redis_connection.host,
+            port=redis_connection.port,
+            db=redis_connection.db
+        ),
     }
     executors = {
         'default': {'type': 'threadpool', 'max_workers': 20},
@@ -27,10 +46,12 @@ def get_scheduler() -> AsyncIOScheduler:
     }
 
     scheduler = AsyncIOScheduler()
-
-    scheduler.configure(jobstores=jobstores, executors=executors,
-                        job_defaults=job_defaults, timezone=utc)
-
+    scheduler.configure(
+        jobstores=jobstores,
+        executors=executors,
+        job_defaults=job_defaults,
+        timezone=utc
+    )
     return scheduler
 
 def get_chat_service(

@@ -4,25 +4,26 @@ from fastapi import WebSocket, HTTPException
 
 from app.models import ChatEvent
 
+connections: Dict[str, WebSocket] = {}
 
 class WebSocketRepository:
     def __init__(self):
-        self.connections: Dict[str, WebSocket] = {}  # chat_id -> WebSocket connection
+        pass
 
     def add_connection(self, chat_id: str, websocket: WebSocket):
-        if chat_id in self.connections:
+        if chat_id in connections:
             raise HTTPException(400, f"Подключение {chat_id} уже занято")
-        self.connections[chat_id] = websocket
+        connections[chat_id] = websocket
 
     def remove_connection(self, chat_id: str):
-        if chat_id in self.connections:
-            del self.connections[chat_id]
+        if chat_id in connections:
+            del connections[chat_id]
 
     def get_connection(self, chat_id: str) -> WebSocket:
-        return self.connections.get(chat_id)
+        return connections.get(chat_id)
 
     async def send_message(self, chat_id: str, event: ChatEvent):
-        websocket = self.connections.get(chat_id)
+        websocket = connections.get(chat_id)
         if websocket:
             try:
                 event_as_json = event.model_dump_json()

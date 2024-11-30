@@ -32,10 +32,10 @@ async def websocket_chat(
         websocket_repository = Depends(get_websocket_repository),
         chat_service: ChatService = Depends(get_chat_service)
 ):
-    if not chat_service.check_chat_exists(chat_id):
-        await websocket.close(reason="Данного чата не существует")
-
     await websocket.accept()
+
+    if not chat_service.check_chat_exists(chat_id):
+        return
 
     websocket_repository.add_connection(chat_id, websocket)
     logging.info(f"Подключение WebSocket для чата {chat_id} установлено.")
