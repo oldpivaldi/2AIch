@@ -1,0 +1,8 @@
+fastapi==0.115.5
+pydantic-settings==2.6.1
+APScheduler~=3.10.4
+apscheduler-di
+redis
+aiohttp
+pytz~=2024.1
+uvicorn==0.32.1

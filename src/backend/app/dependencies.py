@@ -1,5 +1,6 @@
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.executors.asyncio import AsyncIOExecutor
 from pytz import utc
 from fastapi import Depends
 from redis.asyncio import Redis
@@ -29,15 +30,14 @@ def get_websocket_repository() -> WebSocketRepository:
 
 def get_scheduler() -> AsyncIOScheduler:
     jobstores = {
-        'default': MemoryJobStore(),  # Хранилище задач в памяти
+        'default': MemoryJobStore(),
     }
     executors = {
-        'default': {'type': 'threadpool', 'max_workers': 20},
-        'processpool': ProcessPoolExecutor(max_workers=5),
+        'default': AsyncIOExecutor(),
     }
     job_defaults = {
-        'coalesce': False,  # Не объединять пропущенные вызовы
-        'max_instances': 1,  # Максимум одна параллельная задача
+        'coalesce': False,
+        'max_instances': 1,
     }
 
     new_scheduler = AsyncIOScheduler()
@@ -45,7 +45,7 @@ def get_scheduler() -> AsyncIOScheduler:
         jobstores=jobstores,
         executors=executors,
         job_defaults=job_defaults,
-        timezone=utc,  # Используем UTC
+        timezone=utc,
     )
     return new_scheduler
 
