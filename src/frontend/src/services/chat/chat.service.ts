@@ -1,9 +1,5 @@
 import { apiClient } from '@/api/api'
-import {
-	CreateRes,
-	GetHistoryRes,
-	SendMessageReq,
-} from './interfaces/chat.interfaces'
+import { CreateRes, GetHistoryRes, SendMessageReq } from './chat.interfaces'
 
 class ChatService {
 	private readonly BASE_URL = '/chat'

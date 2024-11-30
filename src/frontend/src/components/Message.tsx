@@ -1,20 +1,22 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Bot, User, Copy, Check } from 'lucide-react'
 import { FC, useState } from 'react'
-import { Button } from './ui/button'
+import { Bot, User, Copy, Check } from 'lucide-react'
 import {
-	Tooltip,
-	TooltipContent,
+	Alert,
+	AlertTitle,
+	AlertDescription,
+	Button,
 	TooltipProvider,
+	Tooltip,
 	TooltipTrigger,
-} from './ui/tooltip'
+	TooltipContent,
+} from '@/components'
 
 interface MessageProps {
 	author: 'user' | 'llm'
 	description: string
 }
 
-const Message: FC<MessageProps> = ({ author, description }) => {
+export const Message: FC<MessageProps> = ({ author, description }) => {
 	const [copied, setCopied] = useState(false)
 	const [timerId, setTimerId] = useState<NodeJS.Timeout | undefined>()
 
@@ -60,5 +62,3 @@ const Message: FC<MessageProps> = ({ author, description }) => {
 		</Alert>
 	)
 }
-
-export default Message
