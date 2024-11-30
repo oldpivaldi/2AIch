@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { useHistoryStore } from '@/utils/useHistoryStore'
 import { sortHistory } from '@/utils/sortHistory'
 import { useSocketStatusStore } from '@/utils/useSocketStatusStore'
+import { filterText } from '@/utils/filterText'
 
 const MainContent = () => {
 	const { history, setHistory } = useHistoryStore()
@@ -39,7 +40,7 @@ const MainContent = () => {
 				<Message
 					key={id}
 					author={message.sender}
-					description={message.message}
+					description={filterText(message.message)}
 				/>
 			))}
 			{isLoading && (
