@@ -33,14 +33,14 @@ const MainFooter = () => {
 						timestamp: event.data.timestamp,
 					})
 
-					socket.close(200)
+					socket.close(1000)
 				}
 			}
 
 			socket.onerror = error => {
 				toast.error(`[Socket error]: ${error.type}`)
 
-				socket.close(500, 'Ты пидор')
+				socket.close(1011, 'Ты пидор')
 			}
 
 			setIsGenerating(false)
