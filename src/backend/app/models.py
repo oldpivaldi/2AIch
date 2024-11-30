@@ -3,13 +3,12 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import List, Literal, Optional
 
-
 class Message(BaseModel):
     sender: str
     message: str
     timestamp: datetime
 
-class ChatHistoryResponse(BaseModel):
+class History(BaseModel):
     history: List[Message]
 
 class StartChatResponse(BaseModel):

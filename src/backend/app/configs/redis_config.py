@@ -1,22 +1,23 @@
-from redis import Redis
+from redis.asyncio import Redis
 from redis.exceptions import ConnectionError
 
 
 class RedisConnection:
-    def __init__(self, host: str = "localhost", port: int = 6379, db: int = 0):
+    def __init__(self, host: str = "localhost", port: int = 6380, db: int = 0, password="redis"):
         self.host = host
         self.port = port
         self.db = db
+        self.password = password
         self.redis = None
 
-    def connect(self):
+    async def connect(self):
         try:
-            self.redis = Redis(host=self.host, port=self.port, db=self.db, decode_responses=True)
-            self.redis.ping()  # Проверяем соединение
+            self.redis = Redis(host=self.host, port=self.port, db=self.db, password=self.password, decode_responses=True)
+            await self.redis.ping()  # Проверяем соединение
         except ConnectionError:
             raise ConnectionError(f"Не удалось подключиться к Redis на {self.host}:{self.port}")
 
-    def get_redis(self) -> Redis:
+    async def get_redis(self) -> Redis:
         if not self.redis:
-            self.connect()
+            await self.connect()
         return self.redis

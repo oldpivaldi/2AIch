@@ -17,8 +17,8 @@ redis_connection = RedisConnection()
 def get_text_model_client() -> TextModelClient:
     return TextModelClient("http://localhost:8001")
 
-def get_redis() -> Redis:
-    return redis_connection.get_redis()
+async def get_redis() -> Redis:
+    return await redis_connection.get_redis()
 
 def get_chat_history_repository(
         redis: Redis = Depends(get_redis),
@@ -35,7 +35,8 @@ def get_scheduler() -> AsyncIOScheduler:
             run_times_key='apscheduler.run_times',
             host=redis_connection.host,
             port=redis_connection.port,
-            db=redis_connection.db
+            db=redis_connection.db,
+            password=redis_connection.password,
         ),
     }
     executors = {

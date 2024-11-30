@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import uuid
 from datetime import datetime
@@ -8,7 +7,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from app.clients.text_model_client import TextModelClient
 from app.repositories.chat_repository import ChatHistoryRepository
-from app.models import Message, ChatEvent
+from app.models import Message, ChatEvent, History
 from app.repositories.websocket_repository import WebSocketRepository
 
 
@@ -34,7 +33,7 @@ class ChatService:
     async def check_chat_exists(self, chat_id: str) -> bool:
         return await self.chat_history_repository.check_chat_exists(chat_id)
 
-    async def get_chat_history(self, chat_id: str) -> List[Message]:
+    async def get_chat_history(self, chat_id: str) -> History:
         return await self.chat_history_repository.get_history(chat_id)
 
     async def add_task_for_generate(self, chat_id: str, message: str):
