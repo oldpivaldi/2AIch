@@ -1,15 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from './components/theme-provider'
 import MainPage from './pages/MainPage/MainPage'
-import { Toaster } from './components/ui/sonner'
+import { ThemeProvider, Toaster } from './components'
 
-const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			refetchOnWindowFocus: false,
-		},
-	},
-})
+const queryClient = new QueryClient()
 
 function App() {
 	return (

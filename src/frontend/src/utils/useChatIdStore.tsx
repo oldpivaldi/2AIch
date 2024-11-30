@@ -4,14 +4,14 @@ import { persist } from 'zustand/middleware'
 const CHAT_ID = 'chatId'
 
 interface ChatIdStore {
-	chatId: string | null
-	setChatId: (chatId: string | null) => void
+	chatId: string
+	setChatId: (chatId: string) => void
 }
 
 export const useChatIdStore = create<ChatIdStore>()(
 	persist(
 		set => ({
-			chatId: null,
+			chatId: '',
 			setChatId: chatId => set({ chatId }),
 		}),
 		{

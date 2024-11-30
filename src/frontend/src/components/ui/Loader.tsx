@@ -1,11 +1,9 @@
 import { LoaderIcon } from 'lucide-react'
 
-const Loader = () => {
+export const Loader = () => {
 	return (
 		<div>
 			<LoaderIcon className='animate-spin' />
 		</div>
 	)
 }
-
-export default Loader

@@ -1,26 +1,40 @@
-import Loader from '@/components/Loader'
-import { ModeToggle } from '@/components/mode-toggle'
-import { Button } from '@/components/ui/button'
+import { PenLine } from 'lucide-react'
 import {
+	useIsFetching,
+	useIsMutating,
+	useQueryClient,
+} from '@tanstack/react-query'
+import { useChatIdStore } from '@/utils/useChatIdStore'
+import {
+	ModeToggle,
+	Button,
+	Loader,
 	Tooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { useChatIdStore } from '@/services/chatId/useChatIdStore'
-import { useIsFetching, useQueryClient } from '@tanstack/react-query'
-import { PenLine } from 'lucide-react'
+} from '@/components'
 
 const MainHeader = () => {
 	const queryClient = useQueryClient()
+
 	const setChatId = useChatIdStore(state => state.setChatId)
 
-	const isFetching = useIsFetching({
+	const isFetchingCreateChat = useIsFetching({
 		queryKey: ['createChat'],
 	})
 
+	const isFetchingGetHistory = useIsFetching({
+		queryKey: ['getHistory'],
+	})
+
+	const isMutatingSendMessage = useIsMutating({ mutationKey: ['sendMessage'] })
+
+	const isDisabled =
+		!!isFetchingCreateChat || !!isFetchingGetHistory || !!isMutatingSendMessage
+
 	const handleNewChat = () => {
-		setChatId(null)
+		setChatId('')
 
 		queryClient.invalidateQueries({ queryKey: ['createChat'] })
 	}
@@ -33,10 +47,10 @@ const MainHeader = () => {
 						<Button
 							variant={'outline'}
 							size={'icon'}
-							disabled={!!isFetching}
+							disabled={isDisabled}
 							onClick={handleNewChat}
 						>
-							{isFetching ? <Loader /> : <PenLine />}
+							{isFetchingCreateChat ? <Loader /> : <PenLine />}
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent>
@@ -44,7 +58,7 @@ const MainHeader = () => {
 					</TooltipContent>
 				</Tooltip>
 			</TooltipProvider>
-			<h1 className='text-2xl font-bold'>ChatGPT</h1>
+			<h1 className='text-2xl font-bold'>ChMOCoder</h1>
 			<ModeToggle />
 		</header>
 	)
