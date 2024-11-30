@@ -10,6 +10,18 @@ services:
       - "./src/text_model_api/repo:/app/models"
     networks:
       - network
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
+    restart: always
+
+  backend:
+    build: ./src/backend
+    ports:
+      - "8000:8000"
+    networks:
+      - network
     depends_on:
       - redis
     logging:
