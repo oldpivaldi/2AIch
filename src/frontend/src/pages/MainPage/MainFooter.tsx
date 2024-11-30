@@ -8,9 +8,11 @@ import {
 import { chatService } from '@/services/chat/chat.service'
 import { useChatIdStore } from '@/utils/useChatIdStore'
 import { Button, Textarea, Loader } from '@/components'
+import { useHistoryStore } from '@/utils/useHistoryStore'
 
 const MainFooter = () => {
 	const [text, setText] = useState('')
+	const addMessage = useHistoryStore(state => state.addMessage)
 
 	const chatId = useChatIdStore(state => state.chatId)
 
@@ -33,6 +35,11 @@ const MainFooter = () => {
 
 	const sendText = () => {
 		sendMessage(text)
+		addMessage({
+			sender: 'user',
+			message: text,
+			timestamp: new Date().toISOString(),
+		})
 		setText('')
 	}
 
