@@ -2,16 +2,18 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+RUN apt-get update -q && \
+    apt-get install -y build-essential cmake python3-dev libopenblas-dev git curl && \
+    rm -rf /var/lib/apt/lists/*
 # RUN apt-get update -q && \
-#     apt-get install -y build-essential cmake python3-dev libopenblas-dev git && \
-#     rm -rf /var/lib/apt/lists/*
+#     apt-get install -y curl
 
-# RUN pip install llama-cpp-python
-# RUN curl -fsSL https://ollama.com/install.sh
-# RUN ollama pull llama2-uncensored
+# RUN if [ ! -f /app/models/luna-ai-llama2-uncensored.Q2_K.gguf ]; then \
+#     curl -L -o /app/models/luna-ai-llama2-uncensored.Q2_K.gguf https://huggingface.co/TheBloke/Luna-AI-Llama2-Uncensored-GGUF/blob/main/luna-ai-llama2-uncensored.Q2_K.gguf ; \
+#     fi
 
 COPY . .
 
-RUN pip3 install -U -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT [ "python3", "main.py"]
+ENTRYPOINT [ "python3", "main.py" ]

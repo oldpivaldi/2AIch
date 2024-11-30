@@ -1,6 +1,6 @@
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -42,11 +42,11 @@ class ChatService:
         await self.websocket_repository.send_message(chat_id, ChatEvent(status="generating", message=None, timestamp=datetime.utcnow()))
 
         self.scheduler.add_job(
+            id=f"chat_id:{chat_id}",
             func=self.process_generate,
-            trigger='interval',
-            seconds=2,
-            args=[chat_id],
-            max_instances=1
+            trigger='date',
+            run_date=datetime.utcnow() + timedelta(seconds=3),
+            args=[chat_id]
         )
 
     async def process_generate(self, chat_id: str):
