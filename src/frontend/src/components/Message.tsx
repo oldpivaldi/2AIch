@@ -10,8 +10,17 @@ import {
 	TooltipTrigger,
 	TooltipContent,
 	Skeleton,
+	useTheme,
 } from '@/components'
 import remarkGfm from 'remark-gfm'
+import {
+	oneDark,
+	oneLight,
+} from 'react-syntax-highlighter/dist/esm/styles/prism'
+
+const SyntaxHighlighter = lazy(
+	() => import('react-syntax-highlighter/dist/cjs/prism')
+)
 const Markdown = lazy(() => import('react-markdown'))
 
 interface MessageProps {
@@ -22,6 +31,10 @@ interface MessageProps {
 export const Message: FC<MessageProps> = ({ author, description }) => {
 	const [copied, setCopied] = useState(false)
 	const [timerId, setTimerId] = useState<NodeJS.Timeout | undefined>()
+
+	const theme = useTheme()
+
+	const codeTheme = theme.theme === 'dark' ? oneDark : oneLight
 
 	const handleCopyText = () => {
 		navigator.clipboard.writeText(description)
@@ -44,7 +57,28 @@ export const Message: FC<MessageProps> = ({ author, description }) => {
 			<AlertTitle className='capitalize'>{author}</AlertTitle>
 			<AlertDescription>
 				<Suspense fallback={<Skeleton className='w-full h-5' />}>
-					<Markdown remarkPlugins={[remarkGfm]}>{description}</Markdown>
+					<Markdown
+						children={description}
+						remarkPlugins={[remarkGfm]}
+						components={{
+							code({ className, children, ...rest }) {
+								const match = /language-(\w+)/.exec(className || '')
+
+								return match ? (
+									<SyntaxHighlighter
+										PreTag='div'
+										children={String(children).replace(/\n$/, '')}
+										language={match[1]}
+										style={codeTheme}
+									/>
+								) : (
+									<code {...rest} className={className}>
+										{children}
+									</code>
+								)
+							},
+						}}
+					/>
 				</Suspense>
 			</AlertDescription>
 			<div className='mt-1'>
