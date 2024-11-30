@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат с LLM</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .button-container {
+            margin-bottom: 20px;
+        }
+        .message-box {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .button-container button {
+            margin: 5px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .status {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Чат с LLM</h1>
+
+    <!-- Контейнер для кнопок -->
+    <div class="button-container">
+        <button id="createChatBtn">Создать чат</button>
+        <button id="getHistoryBtn" disabled>Получить историю</button>
+        <button id="sendMessageBtn" disabled>Отправить сообщение</button>
+    </div>
+
+    <!-- Поле для вывода сообщений -->
+    <div id="messageBox" class="message-box"></div>
+
+    <!-- Поле для ввода сообщения -->
+    <div>
+        <input type="text" id="messageInput" placeholder="Введите сообщение..." disabled>
+        <button id="sendMessageInputBtn" disabled>Отправить</button>
+    </div>
+
+    <!-- Статус чата -->
+    <div id="status" class="status"></div>
+</div>
+
+<script>
+    let chatId = null;
+    let socket = null;
+
+    // Создание чата
+    document.getElementById('createChatBtn').addEventListener('click', async () => {
+        const response = await fetch('/chat/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        });
+        const data = await response.json();
+        chatId = data.chat_id;
+
+        // Ожидаем подключения WebSocket
+        setupWebSocket(chatId);
+
+        // Обновляем интерфейс
+        document.getElementById('getHistoryBtn').disabled = false;
+        document.getElementById('sendMessageBtn').disabled = false;
+        document.getElementById('sendMessageInputBtn').disabled = false;
+
+        updateStatus(`Чат с ID ${chatId} создан.`);
+    });
+
+    // Получить историю сообщений
+    document.getElementById('getHistoryBtn').addEventListener('click', async () => {
+        if (!chatId) return;
+
+        const response = await fetch(`/chat/${chatId}/history`);
+        const data = await response.json();
+
+        let historyHtml = "";
+        data.history.forEach(entry => {
+            historyHtml += `<b>${entry.sender}</b>: ${entry.message} <i>${entry.timestamp}</i><br>`;
+        });
+
+        document.getElementById('messageBox').innerHTML = historyHtml;
+    });
+
+    // Отправить сообщение
+    document.getElementById('sendMessageBtn').addEventListener('click', async () => {
+        const message = prompt("Введите сообщение для отправки:");
+
+        if (message && chatId) {
+            const response = await fetch(`/chat/${chatId}/send_message`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+
+            if (response.ok) {
+                updateStatus("Сообщение отправлено!");
+            }
+        }
+    });
+
+    // Отправить сообщение из текстового поля
+    document.getElementById('sendMessageInputBtn').addEventListener('click', async () => {
+        const message = document.getElementById('messageInput').value;
+
+        if (message && chatId) {
+            const response = await fetch(`/chat/${chatId}/send_message`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+
+            if (response.ok) {
+                updateStatus("Сообщение отправлено!");
+                document.getElementById('messageInput').value = '';  // Очистить поле ввода
+            }
+        }
+    });
+
+    // Настройка WebSocket
+    function setupWebSocket(chatId) {
+        const wsUrl = `ws://localhost:8000/chat/${chatId}/ws`;
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = () => {
+            updateStatus("WebSocket подключен.");
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            handleWebSocketMessage(data);
+        };
+
+        socket.onclose = () => {
+            updateStatus("WebSocket отключен.");
+        };
+
+        socket.onerror = (error) => {
+            updateStatus("Ошибка WebSocket: " + error.message);
+        };
+    }
+
+    // Обработка сообщений от WebSocket
+    function handleWebSocketMessage(data) {
+        if (data.status === "generating") {
+            updateStatus(`Генерация ответа... ${data.timestamp}`);
+        } else if (data.status === "completed") {
+            updateStatus(`Ответ сгенерирован: ${data.message} ${data.timestamp}`);
+        }
+    }
+
+    // Обновление статуса
+    function updateStatus(message) {
+        const statusElement = document.getElementById('status');
+        const timestamp = new Date().toISOString();
+        statusElement.innerHTML = `${timestamp}: ${message}`;
+    }
+</script>
+
+</body>
+</html>
