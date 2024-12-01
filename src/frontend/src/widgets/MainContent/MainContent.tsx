@@ -45,7 +45,7 @@ const MainContent = () => {
 	}, [history.length, isGenerating])
 
 	return (
-		<main className='max-h-chat flex-grow flex flex-col gap-5 items-center overflow-y-auto pt-4 pb-9'>
+		<main className='max-h-chat flex-grow flex flex-col gap-5 items-center overflow-y-auto pt-4'>
 			{isLoadingGetHistory && (
 				<div className='my-auto'>
 					<Loader />
@@ -66,7 +66,7 @@ const MainContent = () => {
 					<Skeleton className='h-28' />
 				</div>
 			)}
-			<div ref={bottomRef} />
+			<div ref={bottomRef} className='h-1 w-2/5 pb-9' />
 		</main>
 	)
 }
