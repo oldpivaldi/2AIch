@@ -1,1 +1,1 @@
-export const filterText = (text: string) => text.replaceAll('`', '~')
+export const filterText = (text: string) => text.replaceAll('`', '~').trim()

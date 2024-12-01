@@ -26,10 +26,9 @@ const MainFooter = () => {
 			chatService.sendMessage(chatId, { message }),
 	})
 
-	const { lastJsonMessage } = useWebSocket<SocketMessage>(socketUrl, {
+	const { lastJsonMessage } = useWebSocket<string | null>(socketUrl, {
 		share: false,
 		shouldReconnect: () => true,
-		skipAssert: !chatId,
 	})
 
 	useEffect(() => {
@@ -39,20 +38,22 @@ const MainFooter = () => {
 	}, [chatId])
 
 	useEffect(() => {
-		console.log(`Got a new message: ${lastJsonMessage}`)
+		if (lastJsonMessage) {
+			const socketMessage: SocketMessage = JSON.parse(lastJsonMessage)
 
-		if (lastJsonMessage?.status == StatusMessage.GENERATING) {
-			setIsGenerating(true)
-		}
+			if (socketMessage.status === StatusMessage.GENERATING) {
+				setIsGenerating(true)
+			}
 
-		if (lastJsonMessage?.status == StatusMessage.GENERATED) {
-			addMessage({
-				sender: 'bot',
-				message: lastJsonMessage.message,
-				timestamp: lastJsonMessage.timestamp,
-			})
+			if (socketMessage.status === StatusMessage.GENERATED) {
+				addMessage({
+					sender: 'bot',
+					message: socketMessage.message,
+					timestamp: socketMessage.timestamp,
+				})
 
-			setIsGenerating(false)
+				setIsGenerating(false)
+			}
 		}
 	}, [lastJsonMessage, addMessage, setIsGenerating])
 
