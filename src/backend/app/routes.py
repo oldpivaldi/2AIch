@@ -10,7 +10,7 @@ from app.services.chat_service import ChatService
 router = APIRouter(prefix="/chat")
 
 
-@router.post("/", response_model=StartChatResponse)
+@router.post("", response_model=StartChatResponse)
 async def start_chat(chat_service: ChatService = Depends(get_chat_service)):
     chat_id = await chat_service.create_chat()
     return StartChatResponse(chat_id=chat_id)
