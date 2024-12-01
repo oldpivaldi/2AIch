@@ -61,7 +61,11 @@ const MainContent = () => {
 					description={message.message}
 				/>
 			))}
-			{isGenerating && <Skeleton className='h-28 w-2/5' />}
+			{isGenerating && (
+				<div className='h-28 w-2/5'>
+					<Skeleton className='h-28' />
+				</div>
+			)}
 			<div ref={bottomRef} />
 		</main>
 	)
