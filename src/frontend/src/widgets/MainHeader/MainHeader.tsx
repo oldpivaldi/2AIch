@@ -13,13 +13,18 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/shared/ui'
-import { useChatIdStore, useSocketStatusStore } from '@/entities/chat'
+import {
+	useChatIdStore,
+	useHistoryStore,
+	useSocketStatusStore,
+} from '@/entities/chat'
 
 const MainHeader = () => {
 	const queryClient = useQueryClient()
 
 	const setChatId = useChatIdStore(state => state.setChatId)
 	const isGenerating = useSocketStatusStore(store => store.isGenerating)
+	const setHistory = useHistoryStore(store => store.setHistory)
 
 	const isFetchingCreateChat = useIsFetching({
 		queryKey: ['createChat'],
@@ -31,6 +36,7 @@ const MainHeader = () => {
 
 	const handleCreateChat = () => {
 		setChatId('')
+		setHistory([])
 
 		queryClient.invalidateQueries({ queryKey: ['createChat'] })
 	}
