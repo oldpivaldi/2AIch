@@ -35,7 +35,7 @@ const Message: FC<MessageProps> = ({ author, description }) => {
 
 	const theme = useTheme()
 
-	const codeTheme = theme.theme === 'dark' ? oneDark : oneLight
+	const codeTheme = theme.theme === 'light' ? oneLight : oneDark
 
 	const handleCopyText = () => {
 		navigator.clipboard.writeText(description)
