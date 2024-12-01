@@ -21,6 +21,7 @@ export interface SendMessageReq {
 export enum StatusMessage {
 	GENERATING = 'generating',
 	GENERATED = 'generated',
+	ERROR = 'error',
 }
 
 export interface SocketMessage {

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Loader, Skeleton } from '@/shared/ui'
 import {
@@ -14,6 +14,8 @@ const MainContent = () => {
 	const { history, setHistory } = useHistoryStore()
 	const chatId = useChatIdStore(state => state.chatId)
 	const isGenerating = useSocketStatusStore(state => state.isGenerating)
+
+	const bottomRef = useRef<HTMLDivElement>(null)
 
 	const {
 		data,
@@ -33,6 +35,14 @@ const MainContent = () => {
 		}
 	}, [data, isSuccessGetHistory, setHistory])
 
+	useEffect(() => {
+		if (history.length) {
+			bottomRef.current?.scrollIntoView({
+				block: 'end',
+			})
+		}
+	}, [history.length])
+
 	return (
 		<main className='max-h-chat flex-grow flex flex-col gap-5 items-center overflow-y-auto pt-4 pb-9'>
 			{isLoadingGetHistory && (
@@ -51,6 +61,7 @@ const MainContent = () => {
 				/>
 			))}
 			{isGenerating && <Skeleton className='h-28 w-2/5' />}
+			<div ref={bottomRef} />
 		</main>
 	)
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Send } from 'lucide-react'
 import { useIsFetching, useMutation } from '@tanstack/react-query'
 import useWebSocket from 'react-use-websocket'
+import { toast } from 'sonner'
 import { Button, Textarea, Loader } from '@/shared/ui'
 import {
 	chatService,
@@ -26,10 +27,13 @@ const MainFooter = () => {
 			chatService.sendMessage(chatId, { message }),
 	})
 
-	const { lastJsonMessage } = useWebSocket<string | null>(socketUrl, {
-		share: false,
-		shouldReconnect: () => true,
-	})
+	const { lastJsonMessage, getWebSocket } = useWebSocket<string | null>(
+		socketUrl,
+		{
+			share: false,
+			shouldReconnect: () => true,
+		}
+	)
 
 	useEffect(() => {
 		if (chatId) {
@@ -54,8 +58,18 @@ const MainFooter = () => {
 
 				setIsGenerating(false)
 			}
+
+			if (socketMessage.status === StatusMessage.ERROR) {
+				const socket = getWebSocket()
+
+				socket?.close()
+
+				setIsGenerating(false)
+
+				toast.error(socketMessage.message)
+			}
 		}
-	}, [lastJsonMessage, addMessage, setIsGenerating])
+	}, [lastJsonMessage, addMessage, setIsGenerating, getWebSocket])
 
 	const handleChangeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		setText(e.target.value)
