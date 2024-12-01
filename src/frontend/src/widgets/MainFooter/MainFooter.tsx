@@ -28,11 +28,7 @@ const MainFooter = () => {
 	})
 
 	const { lastJsonMessage, getWebSocket } = useWebSocket<string | null>(
-		socketUrl,
-		{
-			share: false,
-			shouldReconnect: () => true,
-		}
+		socketUrl
 	)
 
 	useEffect(() => {
