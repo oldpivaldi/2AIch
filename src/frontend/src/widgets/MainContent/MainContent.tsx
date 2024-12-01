@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Skeleton } from '@/shared/ui'
+import { Loader, Skeleton } from '@/shared/ui'
 import {
 	sortHistory,
 	useChatIdStore,
@@ -19,7 +19,6 @@ const MainContent = () => {
 		data,
 		isSuccess: isSuccessGetHistory,
 		isLoading: isLoadingGetHistory,
-		isError: isErrorGetHistory,
 	} = useQuery({
 		queryKey: ['getHistory'],
 		queryFn: () => chatService.getHistory(chatId),
@@ -34,10 +33,16 @@ const MainContent = () => {
 		}
 	}, [data, isSuccessGetHistory, setHistory])
 
-	const isLoading = isGenerating || isLoadingGetHistory
-
 	return (
 		<main className='max-h-chat flex-grow flex flex-col gap-5 items-center overflow-y-auto pt-4 pb-9'>
+			{isLoadingGetHistory && (
+				<div className='my-auto'>
+					<Loader />
+				</div>
+			)}
+			{!history.length && !isLoadingGetHistory && (
+				<p className='text-4xl font-semibold my-auto'>What can I do to help?</p>
+			)}
 			{history.map((message, id) => (
 				<Message
 					key={id}
@@ -45,14 +50,7 @@ const MainContent = () => {
 					description={message.message}
 				/>
 			))}
-			{isLoading && (
-				<div className='flex flex-col gap-5 w-2/5'>
-					<Skeleton className='h-28' />
-				</div>
-			)}
-			{isErrorGetHistory && (
-				<p className='text-3xl'>Oops Something Went Wrong</p>
-			)}
+			{isGenerating && <Skeleton className='h-28 w-2/5' />}
 		</main>
 	)
 }

@@ -86,6 +86,11 @@ const MainFooter = () => {
 					className='resize-none min-h-10 h-10 overflow-hidden'
 					value={text}
 					onChange={handleChangeText}
+					onKeyDown={e => {
+						if (e.ctrlKey && e.key === 'Enter' && !isDisableButton) {
+							sendText()
+						}
+					}}
 				/>
 				<Button
 					variant={'outline'}
