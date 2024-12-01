@@ -48,6 +48,7 @@ async def websocket_chat(
     except WebSocketDisconnect:
         websocket_repository.remove_connection(chat_id)
         logging.info(f"Клиент {chat_id} отключился.")
+        await websocket.close()
 
 
 @router.get("/test_redis")
