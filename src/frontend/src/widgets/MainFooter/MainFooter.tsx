@@ -66,6 +66,12 @@ const MainFooter = () => {
 
 				setIsGenerating(false)
 
+				addMessage({
+					sender: 'bot',
+					message: socketMessage.message,
+					timestamp: socketMessage.timestamp,
+				})
+
 				toast.error(socketMessage.message)
 			}
 		}
