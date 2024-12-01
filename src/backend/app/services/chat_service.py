@@ -45,7 +45,7 @@ class ChatService:
             id=f"chat_id:{chat_id}",
             func=self.process_generate,
             trigger='date',
-            run_date=datetime.utcnow() + timedelta(seconds=1),
+            run_date=datetime.utcnow(),
             args=[chat_id]
         )
 
