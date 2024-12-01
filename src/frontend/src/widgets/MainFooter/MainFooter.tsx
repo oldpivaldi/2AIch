@@ -42,6 +42,14 @@ const MainFooter = () => {
 	}, [chatId])
 
 	useEffect(() => {
+		const socket = getWebSocket()
+
+		if (socket) {
+			socket.onerror = () => {
+				toast.error('socket error')
+			}
+		}
+
 		if (lastJsonMessage) {
 			const socketMessage: SocketMessage = JSON.parse(lastJsonMessage)
 
@@ -60,8 +68,6 @@ const MainFooter = () => {
 			}
 
 			if (socketMessage.status === StatusMessage.ERROR) {
-				const socket = getWebSocket()
-
 				socket?.close()
 
 				setIsGenerating(false)
