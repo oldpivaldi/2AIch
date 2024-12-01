@@ -42,7 +42,7 @@ const MainContent = () => {
 				behavior: 'smooth',
 			})
 		}
-	}, [history.length])
+	}, [history.length, isGenerating])
 
 	return (
 		<main className='max-h-chat flex-grow flex flex-col gap-5 items-center overflow-y-auto pt-4 pb-9'>
