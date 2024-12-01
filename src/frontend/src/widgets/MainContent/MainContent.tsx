@@ -39,6 +39,7 @@ const MainContent = () => {
 		if (history.length) {
 			bottomRef.current?.scrollIntoView({
 				block: 'end',
+				behavior: 'smooth',
 			})
 		}
 	}, [history.length])
