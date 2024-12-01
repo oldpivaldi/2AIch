@@ -6,6 +6,7 @@ from app.models import ChatEvent
 
 connections: Dict[str, WebSocket] = {}
 
+
 class WebSocketRepository:
     def __init__(self):
         pass

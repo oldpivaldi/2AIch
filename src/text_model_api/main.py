@@ -37,4 +37,4 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 app.add_event_handler("startup", app_start_handler(app))
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=settings.PORT)
+    uvicorn.run(app, host=settings.HOST, port=settings.PORT)

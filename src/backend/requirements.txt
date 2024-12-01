@@ -1,8 +1,11 @@
 fastapi==0.115.5
+websocket==0.2.1
 pydantic-settings==2.6.1
 APScheduler~=3.10.4
 apscheduler-di
-redis
-aiohttp
+redis~=5.2.0
+aiohttp~=3.11.8
 pytz~=2024.1
-uvicorn==0.32.1
+uvicorn[standard]
+
+pydantic~=2.10.2

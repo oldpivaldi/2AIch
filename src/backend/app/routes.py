@@ -9,6 +9,7 @@ from app.services.chat_service import ChatService
 
 router = APIRouter(prefix="/chat")
 
+
 @router.post("/", response_model=StartChatResponse)
 async def start_chat(chat_service: ChatService = Depends(get_chat_service)):
     chat_id = await chat_service.create_chat()
@@ -29,7 +30,7 @@ async def chat(chat_id: str, request: SendMessageRequest, chat_service: ChatServ
 async def websocket_chat(
         websocket: WebSocket,
         chat_id: str,
-        websocket_repository = Depends(get_websocket_repository),
+        websocket_repository=Depends(get_websocket_repository),
         chat_service: ChatService = Depends(get_chat_service)
 ):
     await websocket.accept()
@@ -47,6 +48,7 @@ async def websocket_chat(
     except WebSocketDisconnect:
         websocket_repository.remove_connection(chat_id)
         logging.info(f"Клиент {chat_id} отключился.")
+
 
 @router.get("/test_redis")
 async def test_redis(redis_client: Redis = Depends(get_redis)):

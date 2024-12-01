@@ -46,22 +46,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
-    BACKEND_CORS_ORIGINS: Annotated[
-        list[AnyUrl] | str, BeforeValidator(parse_cors)
-    ] = []
-
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def all_cors_origins(self) -> list[str]:
-        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
-            self.FRONTEND_HOST
-        ]
-
     PROJECT_NAME: str
-    SENTRY_DSN: HttpUrl | None = None
-    FIRST_SUPERUSER: str
-    FIRST_SUPERUSER_PASSWORD: str
-    TEXT_MODEL_NAME: str
 
 
-settings = Settings()
+settings: BaseSettings = Settings()

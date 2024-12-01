@@ -6,11 +6,10 @@ from pydantic import (
     AnyUrl,
     BeforeValidator,
     HttpUrl,
-    PostgresDsn,
     computed_field,
     model_validator,
 )
-from pydantic_core import MultiHostUrl
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
@@ -25,13 +24,13 @@ def parse_cors(v: Any) -> list[str] | str:
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        # Use top level .env file (one level above ./backend/)
         env_file=".env",
         env_ignore_empty=True,
         extra="ignore",
     )
 
     DOMAIN: str = "localhost"
+    HOST: str = "0.0.0.0"
     PORT: int = 8000
 
     API_V1_STR: str = "/api/v1"
@@ -54,9 +53,10 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
-
     FIRST_SUPERUSER: str
     FIRST_SUPERUSER_PASSWORD: str
+
+    TEXT_MODEL_NAME: str
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

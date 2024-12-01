@@ -145,7 +145,7 @@
 
     // Настройка WebSocket
     function setupWebSocket(chatId) {
-        const wsUrl = `ws://localhost:8000/chat/${chatId}/ws`;
+        const wsUrl = `ws://host.docker.internal:8000/chat/${chatId}/ws`;
         socket = new WebSocket(wsUrl);
 
         socket.onopen = () => {

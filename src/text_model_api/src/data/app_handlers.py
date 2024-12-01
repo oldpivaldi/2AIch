@@ -5,10 +5,11 @@ from fastapi import FastAPI
 from src.core.llama_cpp_answering_model import LlamaCppAnsweringModel
 from src.core.text_model import TextModel
 from src.data.logger import logger
+from src.data.config import settings
 
 
 def _startup_model(app: FastAPI) -> None:
-    model_instance: TextModel = LlamaCppAnsweringModel(model_path="/app/models/luna-ai-llama2-uncensored.Q2_K.gguf")
+    model_instance: TextModel = LlamaCppAnsweringModel(model_path=f"/app/models/{settings.TEXT_MODEL_NAME}")
     app.state.model = model_instance
 
 
