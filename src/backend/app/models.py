@@ -23,6 +23,6 @@ class SendMessageRequest(BaseModel):
 
 
 class ChatEvent(BaseModel):
-    status: Literal['generating', 'generated']
+    status: Literal['generating', 'generated', 'error']
     message: Optional[str]
     timestamp: datetime

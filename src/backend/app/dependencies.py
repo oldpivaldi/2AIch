@@ -21,8 +21,10 @@ redis_connection = RedisConnection(
 )
 
 
-def get_text_model_client() -> TextModelClient:
-    return TextModelClient(settings.TEXT_MODEL_API_URL)
+async def get_text_model_client() -> TextModelClient:
+    client = TextModelClient(settings.TEXT_MODEL_API_URL)
+    await client.init_session()  # Инициализация сессии
+    return client
 
 
 async def get_redis() -> Redis:

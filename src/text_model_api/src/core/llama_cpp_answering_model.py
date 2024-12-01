@@ -4,11 +4,13 @@ from langchain.llms import LlamaCpp
 from src.core.text_model import TextModel
 
 class LlamaCppAnsweringModel(TextModel):
-    def __init__(self, model_path: str = "/app/llama2-uncensored.gguf"):
+    def __init__(self, model_path: str):
         self._engine = LlamaCpp(model_path=model_path)
         self._prompt = PromptTemplate(
             input_variables=["context", "task"],
             template="""
+            Your name is ChMOCoder. Your mission is help people.
+
             Based on the dialog context, respond to the following task.
             The task could be a question, a request for an explanation,
             or a directive to perform an action like writing code.

@@ -45,7 +45,7 @@ class ChatService:
             id=f"chat_id:{chat_id}",
             func=self.process_generate,
             trigger='date',
-            run_date=datetime.utcnow() + timedelta(seconds=5),
+            run_date=datetime.utcnow() + timedelta(seconds=1),
             args=[chat_id]
         )
 
@@ -55,12 +55,18 @@ class ChatService:
         last_message = max(history.history, key=lambda msg: msg.timestamp)
 
         history_messages = sorted(history.history, key=lambda msg: msg.timestamp)
-        print(history_messages)
+
         history_str = "\n".join(f"{msg.sender}: {msg.message}" for msg in history_messages)
+        try:
+            answer = await self.text_model_client.get_answer(last_message.message, history_str)
 
-        answer = await self.text_model_client.get_answer(last_message.message, history_str)
+            await self.chat_history_repository.add_message(chat_id, "bot", answer)
 
-        await self.chat_history_repository.add_message(chat_id, "llm", answer)
-
-        await self.websocket_repository.send_message(chat_id, ChatEvent(status="generated", message=answer,
-                                                                        timestamp=datetime.utcnow()))
+            await self.websocket_repository.send_message(chat_id, ChatEvent(status="generated", message=answer,
+                                                                            timestamp=datetime.utcnow()))
+        except Exception as ex:
+            await self.websocket_repository.send_message(chat_id, ChatEvent(
+                    status="error", message="Reach maximum token length, please restart chat",
+                    timestamp=datetime.utcnow()
+                )
+            )
