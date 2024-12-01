@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import uuid
 from datetime import datetime, timedelta
@@ -37,8 +36,6 @@ class ChatService:
         return await self.chat_history_repository.get_history(chat_id)
 
     async def add_task_for_generate(self, chat_id: str, message: str):
-        await self.chat_history_repository.add_message(chat_id, "user", message)
-
         await self.websocket_repository.send_message(chat_id, ChatEvent(status="generating", message=None, timestamp=datetime.utcnow()))
 
         self.scheduler.add_job(
@@ -46,19 +43,19 @@ class ChatService:
             func=self.process_generate,
             trigger='date',
             run_date=datetime.utcnow(),
-            args=[chat_id]
+            args=[chat_id, message]
         )
 
-    async def process_generate(self, chat_id: str):
+    async def process_generate(self, chat_id: str, message: str):
         history = await self.chat_history_repository.get_history(chat_id)
 
-        last_message = max(history.history, key=lambda msg: msg.timestamp)
+        await self.chat_history_repository.add_message(chat_id, "user", message)
 
         history_messages = sorted(history.history, key=lambda msg: msg.timestamp)
 
-        history_str = "\n".join(f"{msg.sender}: {msg.message}" for msg in history_messages)
+        history_str = "\n\n".join(f"-> {msg.sender}:\n{msg.message}" for msg in history_messages)
         try:
-            answer = await self.text_model_client.get_answer(last_message.message, history_str)
+            answer = await self.text_model_client.get_answer(message, history_str)
 
             await self.chat_history_repository.add_message(chat_id, "bot", answer)
 

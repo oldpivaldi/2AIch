@@ -33,23 +33,25 @@ async def websocket_chat(
         websocket_repository=Depends(get_websocket_repository),
         chat_service: ChatService = Depends(get_chat_service)
 ):
-    await websocket.accept()
-
-    if not await chat_service.check_chat_exists(chat_id):
-        return
-
-    websocket_repository.add_connection(chat_id, websocket)
-    logging.info(f"Подключение WebSocket для чата {chat_id} установлено.")
-
     try:
-        while True:
-            await websocket.receive_text()
+        await websocket.accept()
 
-    except WebSocketDisconnect:
+        if not await chat_service.check_chat_exists(chat_id):
+            return
+
+        websocket_repository.add_connection(chat_id, websocket)
+        logging.info(f"Подключение WebSocket для чата {chat_id} установлено.")
+
+        try:
+            while True:
+                await websocket.receive_text()
+
+        except WebSocketDisconnect:
+            websocket_repository.remove_connection(chat_id)
+            logging.info(f"Клиент {chat_id} отключился.")
+    except RuntimeError as re:
+        logging.info(re)
+    except Exception as e:
+        logging.error(e)
+    finally:
         websocket_repository.remove_connection(chat_id)
-        logging.info(f"Клиент {chat_id} отключился.")
-
-
-@router.get("/test_redis")
-async def test_redis(redis_client: Redis = Depends(get_redis)):
-    pass

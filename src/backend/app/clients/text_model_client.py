@@ -25,11 +25,14 @@ class TextModelClient:
             await self.session.__aexit__(None, None, None)
 
     async def get_answer(self, message: str, context: str) -> str:
-        await self.init_session()
-        url = f"{self.base_url}/api/v1/answer"
-        payload = {"message": message, "context": context}
-        async with self.session.post(url, json=payload) as response:
-            if response.status != 200:
-                raise Exception(f"Ошибка {response.status}: {await response.text()}")
-            answer = (await response.json()).get("message", "")
-            return answer
+        try:
+            await self.init_session()
+            url = f"{self.base_url}/api/v1/answer"
+            payload = {"message": message, "context": context}
+            async with self.session.post(url, json=payload) as response:
+                if response.status != 200:
+                    raise Exception(f"Ошибка {response.status}: {await response.text()}")
+                answer = (await response.json()).get("message", "")
+                return answer
+        finally:
+            await self.close()

@@ -50,7 +50,7 @@ def get_scheduler() -> AsyncIOScheduler:
     }
     job_defaults = {
         'coalesce': False,
-        'max_instances': 1,
+        'max_instances': 5,
     }
 
     new_scheduler = AsyncIOScheduler()
