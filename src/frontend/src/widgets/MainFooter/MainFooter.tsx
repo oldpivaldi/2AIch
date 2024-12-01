@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Send } from 'lucide-react'
 import { useIsFetching, useMutation } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import useWebSocket from 'react-use-websocket'
 import { Button, Textarea, Loader } from '@/shared/ui'
 import {
 	chatService,
@@ -14,6 +14,7 @@ import {
 
 const MainFooter = () => {
 	const [text, setText] = useState('')
+	const [socketUrl, setSocketUrl] = useState<string | null>(null)
 
 	const addMessage = useHistoryStore(state => state.addMessage)
 	const { isGenerating, setIsGenerating } = useSocketStatusStore()
@@ -23,34 +24,37 @@ const MainFooter = () => {
 		mutationKey: ['sendMessage'],
 		mutationFn: (message: string) =>
 			chatService.sendMessage(chatId, { message }),
-		onSuccess: () => {
-			const socket = new WebSocket(
-				`${import.meta.env.VITE_BASE_WS_URL}/${chatId}/ws`
-			)
+	})
 
+	const { lastJsonMessage } = useWebSocket<SocketMessage>(socketUrl, {
+		share: false,
+		shouldReconnect: () => true,
+		skipAssert: !chatId,
+	})
+
+	useEffect(() => {
+		if (chatId) {
+			setSocketUrl(`${import.meta.env.VITE_BASE_WS_URL}/${chatId}/ws`)
+		}
+	}, [chatId])
+
+	useEffect(() => {
+		console.log(`Got a new message: ${lastJsonMessage}`)
+
+		if (lastJsonMessage?.status == StatusMessage.GENERATING) {
 			setIsGenerating(true)
+		}
 
-			socket.onmessage = (event: MessageEvent<SocketMessage>) => {
-				if (event.data.message == StatusMessage.GENERATED) {
-					addMessage({
-						sender: 'llm',
-						message: event.data.message,
-						timestamp: event.data.timestamp,
-					})
-
-					socket.close(1000)
-				}
-			}
-
-			socket.onerror = error => {
-				toast.error(`[Socket error]: ${error.type}`)
-
-				socket.close(1011, 'Ты пидор')
-			}
+		if (lastJsonMessage?.status == StatusMessage.GENERATED) {
+			addMessage({
+				sender: 'bot',
+				message: lastJsonMessage.message,
+				timestamp: lastJsonMessage.timestamp,
+			})
 
 			setIsGenerating(false)
-		},
-	})
+		}
+	}, [lastJsonMessage, addMessage, setIsGenerating])
 
 	const handleChangeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		setText(e.target.value)

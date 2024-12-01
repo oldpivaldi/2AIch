@@ -18,13 +18,14 @@ import {
 	useTheme,
 } from '@/shared/ui'
 import { filterText } from '../lib'
+import { Sender } from '../model'
 const SyntaxHighlighter = lazy(
 	() => import('react-syntax-highlighter/dist/cjs/prism')
 )
 const Markdown = lazy(() => import('react-markdown'))
 
 interface MessageProps {
-	author: 'user' | 'llm'
+	author: Sender
 	description: string
 }
 

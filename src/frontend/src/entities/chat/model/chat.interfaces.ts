@@ -2,8 +2,10 @@ export interface CreateRes {
 	chat_id: string
 }
 
+export type Sender = 'user' | 'bot'
+
 export interface Message {
-	sender: 'user' | 'llm'
+	sender: Sender
 	message: string
 	timestamp: string
 }
