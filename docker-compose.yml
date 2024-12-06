@@ -1,6 +1,22 @@
 version: '3.7'
 
 services:
+  proxy:
+    build: ./src/proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./src/proxy/ssl:/etc/ssl
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      - network
+    depends_on:
+      - frontend
+
   frontend:
     build: ./src/frontend
     ports:
