@@ -1,3 +1,4 @@
+import logging
 from aiohttp import ClientSession
 
 
@@ -28,11 +29,14 @@ class TextModelClient:
         try:
             await self.init_session()
             url = f"{self.base_url}/api/v1/answer"
+            logger = logging.getLogger()
+            logger.info(url)
             payload = {"message": message, "context": context}
             async with self.session.post(url, json=payload) as response:
                 if response.status != 200:
                     raise Exception(f"Ошибка {response.status}: {await response.text()}")
                 answer = (await response.json()).get("message", "")
+                logger.info(answer)
                 return answer
         finally:
             await self.close()

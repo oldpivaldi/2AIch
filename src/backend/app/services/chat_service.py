@@ -55,12 +55,17 @@ class ChatService:
 
         history_str = "\n\n".join(f"-> {msg.sender}:\n{msg.message}" for msg in history_messages)
         try:
+            logger = logging.getLogger()
+            logger.info(f"1 {message} {history_str}")
             answer = await self.text_model_client.get_answer(message, history_str)
+            logger.info(f"2 {message} {history_str} {answer}")
 
             await self.chat_history_repository.add_message(chat_id, "bot", answer)
+            logger.info(f"3 {message} {history_str} {answer}")
 
             await self.websocket_repository.send_message(chat_id, ChatEvent(status="generated", message=answer,
                                                                             timestamp=datetime.utcnow()))
+            logger.info(f"4 {message} {history_str} {answer}")
         except Exception as ex:
             await self.websocket_repository.send_message(chat_id, ChatEvent(
                     status="error", message="Reach maximum token length, please restart chat",
