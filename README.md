@@ -149,3 +149,9 @@ kubectl apply -f text-model-api.yaml
 ```
 eval $(minikube docker-env --unset)
 ```
+
+8. Прокинуть порт 443 до minikube
+
+```
+sudo kubectl --kubeconfig /home/<ваш_пользователь>/.kube/config port-forward -n chmocoder service/proxy 443:443
+```
