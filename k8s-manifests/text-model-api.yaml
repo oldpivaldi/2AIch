@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: text-model-api
+  namespace: chmocoder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: text-model-api
+  template:
+    metadata:
+      labels:
+        app: text-model-api
+    spec:
+      containers:
+      - name: text-model-api
+        image: text-model-api-image:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8001
+        volumeMounts:
+        - name: model-repo
+          mountPath: /app/models
+      volumes:
+      - name: model-repo
+        hostPath:
+          path: /home/docker
+          type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: text-model-api
+  namespace: chmocoder
+spec:
+  ports:
+  - port: 8001
+    targetPort: 8001
+  selector:
+    app: text-model-api

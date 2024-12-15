@@ -40,7 +40,7 @@ services:
     networks:
       - network
     depends_on:
-      - text_model_api
+      - text-model-api
       - redis
     logging:
       options:
@@ -50,7 +50,7 @@ services:
       - "host.docker.internal:host-gateway"
     restart: always
 
-  text_model_api:
+  text-model-api:
     build: ./src/text_model_api
     # environment:
     ports:
