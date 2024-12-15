@@ -12,7 +12,7 @@
 
 ## Презентация проекта
 
-https://docs.google.com/presentation/d/1v-okkSI5phy9HYAVa-BaoX28SymBW1BLEZNtYH7P38Y/edit?usp=sharing
+[https://docs.google.com/presentation/d/1v-okkSI5phy9HYAVa-BaoX28SymBW1BLEZNtYH7P38Y/edit?usp=sharing](https://docs.google.com/presentation/d/1v-okkSI5phy9HYAVa-BaoX28SymBW1BLEZNtYH7P38Y/edit?usp=sharing)
 
 ## Отчет
 
