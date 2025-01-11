@@ -230,6 +230,8 @@ docker compose -f ./docker-compose.yml up --build -d
 
 ## Инструкция по сборке в k8s
 
+_Примечание: k8s работает, названию коммита не верить._ 
+
 1. Запустить minikube:
 
 ```
